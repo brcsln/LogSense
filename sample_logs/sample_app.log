@@ -1,0 +1,7 @@
+2026-07-07 10:00:01 INFO service started on port 8080
+2026-07-07 10:01:12 INFO connected to database
+2026-07-07 10:03:44 WARNING response time exceeded 1200ms for /api/orders
+2026-07-07 10:04:09 ERROR failed to process payment request id=PAY-1042 timeout
+2026-07-07 10:04:12 INFO retry scheduled for payment request id=PAY-1042
+2026-07-07 10:05:31 WARN cache miss rate above threshold
+2026-07-07 10:07:18 ERROR database connection pool exhausted
