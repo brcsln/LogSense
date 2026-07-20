@@ -1,3 +1,16 @@
-backend/__pycache__
-backend/venv
-.agents
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+backend/venv/
+
+# VS Code
+.vscode/
+
+# Environment
+.env
+
+# Windows
+Thumbs.db
