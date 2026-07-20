@@ -1,178 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>LogSense</title>
 
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         body {
             min-height: 100vh;
-            background:
-                radial-gradient(circle at top, #142447 0%, #080d18 48%, #05070d 100%);
+            background: radial-gradient(circle at top, #142447 0%, #080d18 48%, #05070d 100%);
             color: #f3f6ff;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         .page-container {
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            padding: 32px 16px;
+            align-items: center;
+            padding: 30px;
         }
 
         .upload-card {
             width: 100%;
-            max-width: 680px;
-            padding: 48px;
-            background: rgba(14, 22, 38, 0.94);
-            border: 1px solid rgba(82, 145, 255, 0.25);
+            max-width: 700px;
+            background: rgba(14,22,38,.95);
             border-radius: 24px;
-            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(79,140,255,.25);
+            box-shadow: 0 25px 60px rgba(0,0,0,.45);
+            padding: 45px;
         }
 
-        .brand-star {
-            color: #4f8cff;
-            font-size: 48px;
-            line-height: 1;
+        .brand-star{
+            color:#4f8cff;
+            font-size:55px;
         }
 
-        .brand-title {
-            margin-top: 12px;
-            font-size: 42px;
-            font-weight: 700;
-            letter-spacing: -1px;
+        .brand-title{
+            font-size:42px;
+            font-weight:bold;
+            margin-top:8px;
         }
 
-        .brand-subtitle {
-            color: #aebbd2;
-            font-size: 18px;
+        .brand-subtitle{
+            color:#aebbd2;
+            margin-bottom:35px;
         }
 
-        .upload-area {
-            margin-top: 36px;
-            padding: 34px 24px;
-            background: #0b1322;
-            border: 1px dashed #4f8cff;
-            border-radius: 18px;
+        .upload-area{
+            background:#0b1322;
+            border:1px dashed #4f8cff;
+            border-radius:18px;
+            padding:35px;
         }
 
-        .form-control {
-            color: #dfe7f6;
-            background-color: #101a2c;
-            border-color: #2b3b58;
+        .custom-file-upload{
+            display:flex;
+            align-items:center;
+            gap:15px;
+            background:#101a2c;
+            border:1px solid #2b3b58;
+            border-radius:12px;
+            padding:12px;
+            margin-bottom:25px;
         }
 
-        .form-control::file-selector-button {
-            color: #ffffff;
-            background-color: #244a86;
-            border: 0;
+        .file-button{
+            background:#397be8;
+            color:white;
+            padding:10px 18px;
+            border-radius:10px;
+            cursor:pointer;
+            font-weight:600;
+            margin:0;
+            transition:.25s;
         }
 
-        .form-control:focus {
-            color: #ffffff;
-            background-color: #101a2c;
-            border-color: #4f8cff;
-            box-shadow: 0 0 0 0.25rem rgba(79, 140, 255, 0.18);
+        .file-button:hover{
+            background:#4f8cff;
         }
 
-        .btn-primary {
-            padding: 13px 24px;
-            background: #397be8;
-            border: 0;
-            border-radius: 12px;
-            font-weight: 600;
+        .file-name{
+            color:#aebbd2;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
         }
 
-        .btn-primary:hover {
-            background: #4f8cff;
+        .btn-primary{
+            width:100%;
+            padding:13px;
+            border:none;
+            border-radius:12px;
+            background:#397be8;
+            font-weight:bold;
         }
 
-        .privacy-note {
-            color: #8190aa;
-            font-size: 14px;
+        .btn-primary:hover{
+            background:#4f8cff;
         }
 
-        .error-message {
-            margin-top: 20px;
-            padding: 14px 16px;
-            color: #ffb7b7;
-            background: rgba(170, 42, 42, 0.18);
-            border: 1px solid rgba(255, 99, 99, 0.35);
-            border-radius: 12px;
+        .privacy-note{
+            color:#8d99ae;
+            margin-top:25px;
+            font-size:14px;
         }
 
-        @media (max-width: 576px) {
-            .upload-card {
-                padding: 32px 22px;
-            }
-
-            .brand-title {
-                font-size: 34px;
-            }
+        .error-box{
+            background:#551b1b;
+            color:#ffd2d2;
+            border-radius:10px;
+            padding:15px;
+            margin-bottom:25px;
         }
     </style>
+
 </head>
 
 <body>
 
-    <main class="page-container">
-        <section class="upload-card text-center">
+<div class="page-container">
 
-            <div class="brand-star">✦</div>
+    <div class="upload-card text-center">
 
-            <h1 class="brand-title">LogSense</h1>
+        <div class="brand-star">✦</div>
 
-            <p class="brand-subtitle">
-                Understand the story behind incidents.
+        <div class="brand-title">
+            LogSense
+        </div>
+
+        <div class="brand-subtitle">
+            Understand the Story Behind Incidents
+        </div>
+
+        {% if error %}
+            <div class="error-box">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <div class="upload-area">
+
+            <h4 class="mb-3">
+                Upload Production Log
+            </h4>
+
+            <p class="text-secondary mb-4">
+                Select a <strong>.log</strong> or <strong>.txt</strong> file to begin your investigation.
             </p>
 
-            {% if error %}
-                <div class="error-message">
-                    {{ error }}
-                </div>
-            {% endif %}
+            <form action="/upload" method="post" enctype="multipart/form-data">
 
-            <div class="upload-area">
+                <div class="custom-file-upload">
 
-                <h2 class="h5 mb-2">Upload a production log</h2>
-
-                <p class="text-secondary mb-4">
-                    Select a structured <code>.log</code> or <code>.txt</code> file.
-                </p>
-
-                <form
-                    action="/upload"
-                    method="post"
-                    enctype="multipart/form-data"
-                >
                     <input
-                        class="form-control mb-4"
+                        type="file"
                         id="log_file"
                         name="log_file"
-                        type="file"
                         accept=".log,.txt"
-                        required
-                    >
+                        hidden
+                        required>
 
-                    <button class="btn btn-primary w-100" type="submit">
-                        Analyze Incident
-                    </button>
-                </form>
-            </div>
+                    <label class="file-button" for="log_file">
+                        Choose Log File
+                    </label>
 
-            <p class="privacy-note mt-4 mb-0">
-                Fast · Focused · Local analysis
-            </p>
+                    <span id="file-name" class="file-name">
+                        No file selected
+                    </span>
 
-        </section>
-    </main>
+                </div>
+
+                <button class="btn btn-primary" type="submit">
+                    Analyze Incident
+                </button>
+
+            </form>
+
+        </div>
+
+        <div class="privacy-note">
+            Fast • Secure • Local Analysis
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+const fileInput = document.getElementById("log_file");
+const fileName = document.getElementById("file-name");
+
+fileInput.addEventListener("change", function(){
+
+    if(fileInput.files.length > 0){
+
+        fileName.textContent = fileInput.files[0].name;
+
+    }else{
+
+        fileName.textContent = "No file selected";
+
+    }
+
+});
+
+</script>
 
 </body>
+
 </html>
