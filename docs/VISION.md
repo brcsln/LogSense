@@ -1,49 +1,78 @@
-# LogSense
+# ⭐ LogSense Vision
 
 ## Mission
 
-Help engineers understand log files in minutes instead of hours.
+Help engineers understand the story behind production incidents in minutes instead of hours.
 
-## Problem
+---
 
-Modern applications generate thousands or even millions of log lines.
+## The Problem
 
-Finding the real issue is time-consuming and stressful, especially during production incidents.
+Modern systems generate thousands or even millions of log entries every day.
 
-## Solution
+During a production incident, engineers often spend valuable time answering questions such as:
 
-LogSense uses intelligent analysis and AI to:
+- Where did the incident begin?
+- Which component failed first?
+- What happened next?
+- Did the system recover?
 
-- Detect important errors
-- Group similar issues
-- Explain technical messages in plain English
-- Suggest possible root causes
-- Recommend next troubleshooting steps
+Finding those answers manually is slow, stressful, and error-prone.
+
+---
+
+## Our Vision
+
+LogSense helps engineers investigate incidents by transforming raw log files into a clear and structured **Incident Story**.
+
+Instead of searching through thousands of log lines, engineers receive an investigation starting point that helps them understand what happened and where to begin.
+
+---
 
 ## Target Users
 
-- DevOps Engineers
 - Site Reliability Engineers (SRE)
+- DevOps Engineers
+- Operations Engineers
 - System Administrators
 - Software Engineers
-- Operations Teams
 - IT Consultants
 
-## First Version (MVP)
+---
 
-- Upload log file
-- Read file
-- Display file
-- Count ERROR/WARNING/INFO
-- Basic statistics
+## Current MVP
 
-## Future
+- Upload log files
+- Validate uploaded files
+- Stream large log files efficiently
+- Detect ERROR, WARNING, INFO, DEBUG and CRITICAL events
+- Display System Health summary
+- Detect the First Abnormal Event
+- Generate an Incident Story
+- Modern web interface
 
-- AI explanations
-- Root cause analysis
-- Timeline generation
-- PDF reports
-- Grafana integration
-- Kubernetes support
+---
+
+## Future Roadmap
+
+### Investigation
+
+- Scope detection
+- Impact analysis
+- Event correlation
+- Recovery detection
+
+### AI Assistance
+
+- Plain-language explanations
+- Root cause suggestions
+- Investigation recommendations
+- Intelligent incident summaries
+
+### Integrations
+
+- Grafana
+- Kubernetes
 - Docker logs
 - Windows Event Logs
+- PDF export
