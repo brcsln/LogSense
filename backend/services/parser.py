@@ -31,6 +31,12 @@ def parse_log(file):
         "first_abnormal_component": None,
         "first_abnormal_message": None,
         "incident_story": [],
+        "incident_summary": {
+            "started_at": None,
+            "component": None,
+            "severity": None,
+            "status": "Healthy",
+        },
     }
 
     incident_started = False
@@ -53,33 +59,44 @@ def parse_log(file):
 
         if severity == "CRITICAL":
             result["critical"] += 1
+
         elif severity == "ERROR":
             result["errors"] += 1
+
         elif severity == "WARNING":
             result["warnings"] += 1
+
         elif severity == "INFO":
             result["info"] += 1
+
         elif severity == "DEBUG":
             result["debug"] += 1
 
         is_abnormal = severity in {"CRITICAL", "ERROR", "WARNING"}
+
         is_recovery = any(
             keyword in message_upper
             for keyword in RECOVERY_KEYWORDS
         )
 
         if is_abnormal:
-            incident_started = True
+
+            event["event_type"] = classify_event(event, incident_started)
 
             if result["first_abnormal_line"] is None:
                 save_first_abnormal(result, line, event)
+
+            incident_started = True
 
             result["incident_story"].append(event)
 
         elif incident_started and is_recovery:
             recovery_event = event.copy()
             recovery_event["event_type"] = "RECOVERY"
+
             result["incident_story"].append(recovery_event)
+
+            result["incident_summary"]["status"] = "Recovered"
 
     return result
 
@@ -105,3 +122,25 @@ def save_first_abnormal(result, line, event):
     result["first_abnormal_time"] = event["time"]
     result["first_abnormal_component"] = event["component"]
     result["first_abnormal_message"] = event["message"]
+
+    result["incident_summary"]["started_at"] = event["time"]
+    result["incident_summary"]["component"] = event["component"]
+    result["incident_summary"]["severity"] = event["severity"]
+    result["incident_summary"]["status"] = "Degraded"
+
+def classify_event(event, incident_started):
+    """
+    Classify an event into a meaningful investigation stage.
+    """
+
+    severity = event["severity"]
+
+    if not incident_started:
+        return "INCIDENT_START"
+
+    if severity in {"ERROR", "CRITICAL"}:
+        return "FAILURE"
+
+    return "WARNING"
+
+    

@@ -15,7 +15,12 @@
         body {
             min-height: 100vh;
             background:
-                radial-gradient(circle at top, #142447 0%, #080d18 45%, #05070d 100%);
+                radial-gradient(
+                    circle at top,
+                    #142447 0%,
+                    #080d18 45%,
+                    #05070d 100%
+                );
             color: #edf3ff;
         }
 
@@ -87,6 +92,12 @@
             gap: 12px;
         }
 
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
         .severity-item {
             padding: 18px 12px;
             text-align: center;
@@ -100,6 +111,11 @@
             margin-top: 6px;
             font-size: 26px;
             font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .summary-value {
+            font-size: 17px;
         }
 
         .critical {
@@ -185,6 +201,14 @@
             content: "";
         }
 
+        .timeline-event.incident-start::before {
+            background: #ffd166;
+        }
+
+        .timeline-event.failure::before {
+            background: #ff8a65;
+        }
+
         .timeline-event.recovery::before {
             background: #42d392;
         }
@@ -248,19 +272,45 @@
             border-color: #244a86;
         }
 
+        @media (max-width: 900px) {
+            .severity-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media (max-width: 768px) {
             .topbar {
                 align-items: flex-start;
                 flex-direction: column;
             }
 
-            .severity-grid {
+            .severity-grid,
+            .summary-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
 
             .event-details {
                 grid-template-columns: 1fr;
                 gap: 3px;
+            }
+
+            .timeline {
+                padding-left: 34px;
+            }
+
+            .timeline-event::before {
+                left: -28px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .severity-grid,
+            .summary-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -278,7 +328,7 @@
                 </div>
 
                 <p class="subtitle mb-0 mt-2">
-                    Incident analysis completed.
+                    Incident investigation completed.
                 </p>
             </div>
 
@@ -293,7 +343,9 @@
                 <section class="panel">
                     <h2 class="section-title">Uploaded File</h2>
 
-                    <div class="filename">{{ filename }}</div>
+                    <div class="filename">
+                        {{ filename }}
+                    </div>
 
                     <p class="muted mt-3 mb-1">
                         Total log lines
@@ -354,6 +406,60 @@
 
         <section class="panel mb-4">
 
+            <h2 class="section-title">Incident Summary</h2>
+
+            <div class="summary-grid">
+
+                <div class="severity-item">
+                    <span class="muted">Started At</span>
+
+                    <span class="severity-number summary-value">
+                        {{ analysis.incident_summary.started_at or "Not detected" }}
+                    </span>
+                </div>
+
+                <div class="severity-item">
+                    <span class="muted">Starting Component</span>
+
+                    <span class="severity-number summary-value">
+                        {{ analysis.incident_summary.component or "Not detected" }}
+                    </span>
+                </div>
+
+                <div class="severity-item">
+                    <span class="muted">Initial Severity</span>
+
+                    <span class="severity-number">
+                        {{ analysis.incident_summary.severity or "None" }}
+                    </span>
+                </div>
+
+                <div class="severity-item">
+                    <span class="muted">Current Status</span>
+
+                    {% if analysis.incident_summary.status == "Recovered" %}
+                        <span class="severity-number info">
+                            Recovered
+                        </span>
+
+                    {% elif analysis.incident_summary.status == "Degraded" %}
+                        <span class="severity-number warning">
+                            Degraded
+                        </span>
+
+                    {% else %}
+                        <span class="severity-number info">
+                            Healthy
+                        </span>
+                    {% endif %}
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="panel mb-4">
+
             <h2 class="section-title">First Abnormal Event</h2>
 
             {% if analysis.first_abnormal_line %}
@@ -394,7 +500,7 @@
 
         <section class="panel">
 
-            <h2 class="section-title">Incident Story</h2>
+            <h2 class="section-title">Incident Timeline</h2>
 
             {% if analysis.incident_story %}
 
@@ -403,24 +509,42 @@
                     {% for event in analysis.incident_story %}
 
                         <article
-                            class="timeline-event {% if event.event_type == 'RECOVERY' %}recovery{% endif %}"
+                            class="
+                                timeline-event
+                                {% if event.event_type == 'INCIDENT_START' %}
+                                    incident-start
+                                {% elif event.event_type == 'FAILURE' %}
+                                    failure
+                                {% elif event.event_type == 'RECOVERY' %}
+                                    recovery
+                                {% endif %}
+                            "
                         >
 
                             <div class="event-heading">
 
                                 <div>
-                                    {% if event.event_type == "RECOVERY" %}
+
+                                    {% if event.event_type == "INCIDENT_START" %}
+                                        <span class="severity-badge badge-warning">
+                                            Incident Started
+                                        </span>
+
+                                    {% elif event.event_type == "FAILURE" %}
+                                        <span class="severity-badge badge-error">
+                                            Failure
+                                        </span>
+
+                                    {% elif event.event_type == "RECOVERY" %}
                                         <span class="severity-badge badge-recovery">
                                             Recovery
                                         </span>
+
                                     {% elif event.severity == "CRITICAL" %}
                                         <span class="severity-badge badge-critical">
                                             Critical
                                         </span>
-                                    {% elif event.severity == "ERROR" %}
-                                        <span class="severity-badge badge-error">
-                                            Error
-                                        </span>
+
                                     {% else %}
                                         <span class="severity-badge badge-warning">
                                             Warning
@@ -430,6 +554,7 @@
                                     <span class="component ms-2">
                                         {{ event.component }}
                                     </span>
+
                                 </div>
 
                                 <time class="muted">

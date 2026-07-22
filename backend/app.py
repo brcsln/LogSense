@@ -33,7 +33,7 @@ async def upload_log(
             status_code=400,
         )
     analysis = parse_log(log_file.file)
-    print("ANALYSIS:", analysis)
+
     return templates.TemplateResponse(
      request=request,
      name="result.html",
