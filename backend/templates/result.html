@@ -1,589 +1,516 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>LogSense - Incident Analysis</title>
-
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-    >
-
-    <style>
-        body {
-            min-height: 100vh;
-            background:
-                radial-gradient(
-                    circle at top,
-                    #142447 0%,
-                    #080d18 45%,
-                    #05070d 100%
-                );
-            color: #edf3ff;
+   <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>LogSense - Incident Analysis</title>
+      <link
+         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+         rel="stylesheet"
+         >
+      <style>
+         body {
+         min-height: 100vh;
+         background:
+         radial-gradient(
+         circle at top,
+         #142447 0%,
+         #080d18 45%,
+         #05070d 100%
+         );
+         color: #edf3ff;
+         }
+         .page-shell {
+         width: 100%;
+         max-width: 1100px;
+         margin: 0 auto;
+         padding: 42px 18px 70px;
+         }
+         .topbar {
+         display: flex;
+         align-items: center;
+         justify-content: space-between;
+         gap: 16px;
+         margin-bottom: 34px;
+         }
+         .brand {
+         display: flex;
+         align-items: center;
+         gap: 12px;
+         }
+         .brand-star {
+         color: #4f8cff;
+         font-size: 34px;
+         }
+         .brand-name {
+         margin: 0;
+         font-size: 28px;
+         font-weight: 700;
+         }
+         .subtitle {
+         color: #9ba9c0;
+         }
+         .panel {
+         height: 100%;
+         padding: 26px;
+         background: rgba(14, 22, 38, 0.94);
+         border: 1px solid rgba(82, 145, 255, 0.2);
+         border-radius: 20px;
+         box-shadow: 0 18px 55px rgba(0, 0, 0, 0.28);
+         }
+         .component-impact-card {
+        margin-bottom: 28px;
         }
 
-        .page-shell {
-            width: 100%;
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 42px 18px 70px;
+        .component-impact-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 18px;
         }
 
-        .topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            margin-bottom: 34px;
+        .component-impact-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 18px;
+        border: 1px solid #203b5c;
+        border-radius: 12px;
+        background: #071729;
         }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        .component-name {
+        font-weight: 600;
+        color: #ffffff;
         }
 
-        .brand-star {
-            color: #4f8cff;
-            font-size: 34px;
+        .component-count {
+        color: #8db8ef;
+        font-size: 0.95rem;
         }
-
-        .brand-name {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .subtitle {
-            color: #9ba9c0;
-        }
-
-        .panel {
-            height: 100%;
-            padding: 26px;
-            background: rgba(14, 22, 38, 0.94);
-            border: 1px solid rgba(82, 145, 255, 0.2);
-            border-radius: 20px;
-            box-shadow: 0 18px 55px rgba(0, 0, 0, 0.28);
-        }
-
-        .section-title {
-            margin-bottom: 20px;
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .filename {
-            overflow-wrap: anywhere;
-            color: #ffffff;
-            font-size: 20px;
-            font-weight: 600;
-        }
-
-        .muted {
-            color: #8f9db4;
-        }
-
-        .severity-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-        }
-
-        .severity-item {
-            padding: 18px 12px;
-            text-align: center;
-            background: #0b1322;
-            border: 1px solid #24334d;
-            border-radius: 14px;
-        }
-
-        .severity-number {
-            display: block;
-            margin-top: 6px;
-            font-size: 26px;
-            font-weight: 700;
-            overflow-wrap: anywhere;
-        }
-
-        .summary-value {
-            font-size: 17px;
-        }
-
-        .critical {
-            color: #ff5d75;
-        }
-
-        .error {
-            color: #ff8a65;
-        }
-
-        .warning {
-            color: #ffd166;
-        }
-
-        .info {
-            color: #61d8a6;
-        }
-
-        .debug {
-            color: #7fa9ff;
-        }
-
-        .first-event {
-            padding: 22px;
-            background: rgba(255, 193, 7, 0.07);
-            border: 1px solid rgba(255, 193, 7, 0.25);
-            border-radius: 16px;
-        }
-
-        .first-event-label {
-            color: #ffd166;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .event-details {
-            display: grid;
-            grid-template-columns: 150px 1fr;
-            gap: 10px 18px;
-            margin-top: 18px;
-        }
-
-        .detail-label {
-            color: #8f9db4;
-        }
-
-        .timeline {
-            position: relative;
-            margin-top: 12px;
-            padding-left: 42px;
-        }
-
-        .timeline::before {
-            position: absolute;
-            top: 12px;
-            bottom: 12px;
-            left: 13px;
-            width: 2px;
-            background: #273955;
-            content: "";
-        }
-
-        .timeline-event {
-            position: relative;
-            margin-bottom: 24px;
-            padding: 21px;
-            background: #0b1322;
-            border: 1px solid #24334d;
-            border-radius: 16px;
-        }
-
-        .timeline-event::before {
-            position: absolute;
-            top: 24px;
-            left: -36px;
-            width: 16px;
-            height: 16px;
-            background: #4f8cff;
-            border: 3px solid #09101d;
-            border-radius: 50%;
-            content: "";
-        }
-
-        .timeline-event.incident-start::before {
-            background: #ffd166;
-        }
-
-        .timeline-event.failure::before {
-            background: #ff8a65;
-        }
-
-        .timeline-event.recovery::before {
-            background: #42d392;
-        }
-
-        .event-heading {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        .severity-badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 999px;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .badge-critical {
-            color: #ffc5ce;
-            background: rgba(255, 62, 91, 0.18);
-        }
-
-        .badge-error {
-            color: #ffd0c1;
-            background: rgba(255, 105, 70, 0.18);
-        }
-
-        .badge-warning {
-            color: #ffe29a;
-            background: rgba(255, 193, 7, 0.16);
-        }
-
-        .badge-recovery {
-            color: #aaf3d0;
-            background: rgba(46, 204, 138, 0.16);
-        }
-
-        .component {
-            color: #7fa9ff;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .event-message {
-            margin: 12px 0 0;
-            color: #e8eef9;
-            font-size: 17px;
-        }
-
-        .btn-outline-light {
-            border-color: #445671;
-            border-radius: 11px;
-        }
-
-        .btn-outline-light:hover {
-            color: #ffffff;
-            background: #244a86;
-            border-color: #244a86;
-        }
-
-        @media (max-width: 900px) {
-            .severity-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .summary-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .topbar {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .severity-grid,
-            .summary-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .event-details {
-                grid-template-columns: 1fr;
-                gap: 3px;
-            }
-
-            .timeline {
-                padding-left: 34px;
-            }
-
-            .timeline-event::before {
-                left: -28px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .severity-grid,
-            .summary-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-
-<body>
-
-    <main class="page-shell">
-
-        <header class="topbar">
+         .section-title {
+         margin-bottom: 20px;
+         font-size: 18px;
+         font-weight: 700;
+         }
+         .filename {
+         overflow-wrap: anywhere;
+         color: #ffffff;
+         font-size: 20px;
+         font-weight: 600;
+         }
+         .muted {
+         color: #8f9db4;
+         }
+         .severity-grid {
+         display: grid;
+         grid-template-columns: repeat(5, 1fr);
+         gap: 12px;
+         }
+         .summary-grid {
+         display: grid;
+         grid-template-columns: repeat(4, 1fr);
+         gap: 12px;
+         }
+                  .severity-item {
+         padding: 18px 12px;
+         text-align: center;
+         background: #0b1322;
+         border: 1px solid #24334d;
+         border-radius: 14px;
+         }
+         .severity-number {
+         display: block;
+         margin-top: 6px;
+         font-size: 26px;
+         font-weight: 700;
+         overflow-wrap: anywhere;
+         }
+         .summary-value {
+         font-size: 17px;
+         }
+         .critical {
+         color: #ff5d75;
+         }
+         .error {
+         color: #ff8a65;
+         }
+         .warning {
+         color: #ffd166;
+         }
+         .info {
+         color: #61d8a6;
+         }
+         .debug {
+         color: #7fa9ff;
+         }
+         .first-event {
+         padding: 22px;
+         background: rgba(255, 193, 7, 0.07);
+         border: 1px solid rgba(255, 193, 7, 0.25);
+         border-radius: 16px;
+         }
+         .first-event-label {
+         color: #ffd166;
+         font-size: 13px;
+         font-weight: 700;
+         letter-spacing: 0.08em;
+         text-transform: uppercase;
+         }
+         .event-details {
+         display: grid;
+         grid-template-columns: 150px 1fr;
+         gap: 10px 18px;
+         margin-top: 18px;
+         }
+         .detail-label {
+         color: #8f9db4;
+         }
+         .timeline {
+         position: relative;
+         margin-top: 12px;
+         padding-left: 42px;
+         }
+         .timeline::before {
+         position: absolute;
+         top: 12px;
+         bottom: 12px;
+         left: 13px;
+         width: 2px;
+         background: #273955;
+         content: "";
+         }
+         .timeline-event {
+         position: relative;
+         margin-bottom: 24px;
+         padding: 21px;
+         background: #0b1322;
+         border: 1px solid #24334d;
+         border-radius: 16px;
+         }
+         .timeline-event::before {
+         position: absolute;
+         top: 24px;
+         left: -36px;
+         width: 16px;
+         height: 16px;
+         background: #4f8cff;
+         border: 3px solid #09101d;
+         border-radius: 50%;
+         content: "";
+         }
+         .timeline-event.incident-start::before {
+         background: #ffd166;
+         }
+         .timeline-event.failure::before {
+         background: #ff8a65;
+         }
+         .timeline-event.recovery::before {
+         background: #42d392;
+         }
+         .event-heading {
+         display: flex;
+         flex-wrap: wrap;
+         align-items: center;
+         justify-content: space-between;
+         gap: 10px;
+         }
+         .severity-badge {
+         display: inline-block;
+         padding: 5px 10px;
+         border-radius: 999px;
+         font-size: 12px;
+         font-weight: 700;
+         }
+         .badge-critical {
+         color: #ffc5ce;
+         background: rgba(255, 62, 91, 0.18);
+         }
+         .badge-error {
+         color: #ffd0c1;
+         background: rgba(255, 105, 70, 0.18);
+         }
+         .badge-warning {
+         color: #ffe29a;
+         background: rgba(255, 193, 7, 0.16);
+         }
+         .badge-recovery {
+         color: #aaf3d0;
+         background: rgba(46, 204, 138, 0.16);
+         }
+         .component {
+         color: #7fa9ff;
+         font-size: 14px;
+         font-weight: 600;
+         }
+         .event-message {
+         margin: 12px 0 0;
+         color: #e8eef9;
+         font-size: 17px;
+         }
+         .btn-outline-light {
+         border-color: #445671;
+         border-radius: 11px;
+         }
+         .btn-outline-light:hover {
+         color: #ffffff;
+         background: #244a86;
+         border-color: #244a86;
+         }
+         @media (max-width: 900px) {
+         .severity-grid {
+         grid-template-columns: repeat(3, 1fr);
+         }
+         .summary-grid {
+         grid-template-columns: repeat(2, 1fr);
+         }
+         }
+         @media (max-width: 768px) {
+         .topbar {
+         align-items: flex-start;
+         flex-direction: column;
+         }
+         .severity-grid,
+         .summary-grid {
+         grid-template-columns: repeat(2, 1fr);
+         }
+         .event-details {
+         grid-template-columns: 1fr;
+         gap: 3px;
+         }
+         .timeline {
+         padding-left: 34px;
+         }
+         .timeline-event::before {
+         left: -28px;
+         }
+         }
+         @media (max-width: 480px) {
+         .severity-grid,
+         .summary-grid {
+         grid-template-columns: 1fr;
+         }
+         }
+      </style>
+   </head>
+   <body>
+      <main class="page-shell">
+         <header class="topbar">
             <div>
-                <div class="brand">
-                    <span class="brand-star">✦</span>
-                    <h1 class="brand-name">LogSense</h1>
-                </div>
-
-                <p class="subtitle mb-0 mt-2">
-                    Incident investigation completed.
-                </p>
+               <div class="brand">
+                  <span class="brand-star">✦</span>
+                  <h1 class="brand-name">LogSense</h1>
+               </div>
+               <p class="subtitle mb-0 mt-2">
+                  Incident investigation completed.
+               </p>
             </div>
-
             <a class="btn btn-outline-light" href="/">
-                Start New Investigation
+            Start New Investigation
             </a>
-        </header>
-
-        <div class="row g-4 mb-4">
-
+         </header>
+         <div class="row g-4 mb-4">
             <div class="col-lg-4">
-                <section class="panel">
-                    <h2 class="section-title">Uploaded File</h2>
-
-                    <div class="filename">
-                        {{ filename }}
-                    </div>
-
-                    <p class="muted mt-3 mb-1">
-                        Total log lines
-                    </p>
-
-                    <div class="display-6 fw-bold">
-                        {{ analysis.total_lines }}
-                    </div>
-                </section>
+               <section class="panel">
+                  <h2 class="section-title">Uploaded File</h2>
+                  <div class="filename">
+                     {{ filename }}
+                  </div>
+                  <p class="muted mt-3 mb-1">
+                     Total log lines
+                  </p>
+                  <div class="display-6 fw-bold">
+                     {{ analysis.total_lines }}
+                  </div>
+               </section>
             </div>
-
             <div class="col-lg-8">
-                <section class="panel">
-                    <h2 class="section-title">System Health</h2>
-
-                    <div class="severity-grid">
-
-                        <div class="severity-item">
-                            <span class="critical">Critical</span>
-                            <span class="severity-number">
-                                {{ analysis.critical }}
-                            </span>
-                        </div>
-
-                        <div class="severity-item">
-                            <span class="error">Errors</span>
-                            <span class="severity-number">
-                                {{ analysis.errors }}
-                            </span>
-                        </div>
-
-                        <div class="severity-item">
-                            <span class="warning">Warnings</span>
-                            <span class="severity-number">
-                                {{ analysis.warnings }}
-                            </span>
-                        </div>
-
-                        <div class="severity-item">
-                            <span class="info">Info</span>
-                            <span class="severity-number">
-                                {{ analysis.info }}
-                            </span>
-                        </div>
-
-                        <div class="severity-item">
-                            <span class="debug">Debug</span>
-                            <span class="severity-number">
-                                {{ analysis.debug }}
-                            </span>
-                        </div>
-
-                    </div>
-                </section>
+               <section class="panel">
+                  <h2 class="section-title">System Health</h2>
+                  <div class="severity-grid">
+                     <div class="severity-item">
+                        <span class="critical">Critical</span>
+                        <span class="severity-number">
+                        {{ analysis.critical }}
+                        </span>
+                     </div>
+                     <div class="severity-item">
+                        <span class="error">Errors</span>
+                        <span class="severity-number">
+                        {{ analysis.errors }}
+                        </span>
+                     </div>
+                     <div class="severity-item">
+                        <span class="warning">Warnings</span>
+                        <span class="severity-number">
+                        {{ analysis.warnings }}
+                        </span>
+                     </div>
+                     <div class="severity-item">
+                        <span class="info">Info</span>
+                        <span class="severity-number">
+                        {{ analysis.info }}
+                        </span>
+                     </div>
+                     <div class="severity-item">
+                        <span class="debug">Debug</span>
+                        <span class="severity-number">
+                        {{ analysis.debug }}
+                        </span>
+                     </div>
+                  </div>
+               </section>
             </div>
-
-        </div>
-
-        <section class="panel mb-4">
-
+         </div>
+         <section class="panel mb-4">
             <h2 class="section-title">Incident Summary</h2>
 
             <div class="summary-grid">
+               <div class="severity-item">
+                  <span class="muted">Started At</span>
+                  <span class="severity-number summary-value">
+                     {{ analysis.incident_summary.started_at or "Not detected" }}
+                  </span>
+               </div>
 
-                <div class="severity-item">
-                    <span class="muted">Started At</span>
+               <div class="severity-item">
+                  <span class="muted">Starting Component</span>
+                  <span class="severity-number summary-value">
+                     {{ analysis.incident_summary.component or "Not detected" }}
+                  </span>
+               </div>
 
-                    <span class="severity-number summary-value">
-                        {{ analysis.incident_summary.started_at or "Not detected" }}
-                    </span>
-                </div>
+               <div class="severity-item">
+                  <span class="muted">Initial Severity</span>
+                  <span class="severity-number">
+                     {{ analysis.incident_summary.severity or "None" }}
+                  </span>
+               </div>
 
-                <div class="severity-item">
-                    <span class="muted">Starting Component</span>
+               <div class="severity-item">
+                  <span class="muted">Current Status</span>
 
-                    <span class="severity-number summary-value">
-                        {{ analysis.incident_summary.component or "Not detected" }}
-                    </span>
-                </div>
-
-                <div class="severity-item">
-                    <span class="muted">Initial Severity</span>
-
-                    <span class="severity-number">
-                        {{ analysis.incident_summary.severity or "None" }}
-                    </span>
-                </div>
-
-                <div class="severity-item">
-                    <span class="muted">Current Status</span>
-
-                    {% if analysis.incident_summary.status == "Recovered" %}
-                        <span class="severity-number info">
-                            Recovered
-                        </span>
-
-                    {% elif analysis.incident_summary.status == "Degraded" %}
-                        <span class="severity-number warning">
-                            Degraded
-                        </span>
-
-                    {% else %}
-                        <span class="severity-number info">
-                            Healthy
-                        </span>
-                    {% endif %}
-                </div>
-
+                  {% if analysis.incident_summary.status == "Recovered" %}
+                  <span class="severity-number info">
+                     Recovered
+                  </span>
+                  {% elif analysis.incident_summary.status == "Degraded" %}
+                  <span class="severity-number warning">
+                     Degraded
+                  </span>
+                  {% else %}
+                  <span class="severity-number info">
+                     Healthy
+                  </span>
+                  {% endif %}
+               </div>
             </div>
 
-        </section>
+            <h2 class="section-title mt-4">Component Impact</h2>
 
-        <section class="panel mb-4">
+            {% if analysis.component_summary %}
+            <div class="summary-grid">
+               {% for component, count in analysis.component_summary.items() %}
+               <div class="severity-item">
+                  <span class="muted">{{ component }}</span>
+                  <span class="severity-number">{{ count }}</span>
+                  <span class="muted">
+                     abnormal event{% if count != 1 %}s{% endif %}
+                  </span>
+               </div>
+               {% endfor %}
+            </div>
+            {% else %}
+            <p class="muted mb-0">
+               No affected components detected.
+            </p>
+            {% endif %}
+         </section>
 
+         <section class="panel mb-4">
             <h2 class="section-title">First Abnormal Event</h2>
-
             {% if analysis.first_abnormal_line %}
-
-                <div class="first-event">
-
-                    <div class="first-event-label">
-                        Investigation starting point
-                    </div>
-
-                    <div class="event-details">
-
-                        <div class="detail-label">Severity</div>
-                        <div>{{ analysis.first_abnormal_severity }}</div>
-
-                        <div class="detail-label">Time</div>
-                        <div>{{ analysis.first_abnormal_time }}</div>
-
-                        <div class="detail-label">Component</div>
-                        <div>{{ analysis.first_abnormal_component }}</div>
-
-                        <div class="detail-label">Message</div>
-                        <div>{{ analysis.first_abnormal_message }}</div>
-
-                    </div>
-
-                </div>
-
+            <div class="first-event">
+               <div class="first-event-label">
+                  Investigation starting point
+               </div>
+               <div class="event-details">
+                  <div class="detail-label">Severity</div>
+                  <div>{{ analysis.first_abnormal_severity }}</div>
+                  <div class="detail-label">Time</div>
+                  <div>{{ analysis.first_abnormal_time }}</div>
+                  <div class="detail-label">Component</div>
+                  <div>{{ analysis.first_abnormal_component }}</div>
+                  <div class="detail-label">Message</div>
+                  <div>{{ analysis.first_abnormal_message }}</div>
+               </div>
+            </div>
             {% else %}
-
-                <div class="alert alert-success mb-0">
-                    No abnormal events detected.
-                </div>
-
+            <div class="alert alert-success mb-0">
+               No abnormal events detected.
+            </div>
             {% endif %}
-
-        </section>
-
-        <section class="panel">
-
+         </section>
+         <section class="panel">
             <h2 class="section-title">Incident Timeline</h2>
-
             {% if analysis.incident_story %}
-
-                <div class="timeline">
-
-                    {% for event in analysis.incident_story %}
-
-                        <article
-                            class="
-                                timeline-event
-                                {% if event.event_type == 'INCIDENT_START' %}
-                                    incident-start
-                                {% elif event.event_type == 'FAILURE' %}
-                                    failure
-                                {% elif event.event_type == 'RECOVERY' %}
-                                    recovery
-                                {% endif %}
-                            "
-                        >
-
-                            <div class="event-heading">
-
-                                <div>
-
-                                    {% if event.event_type == "INCIDENT_START" %}
-                                        <span class="severity-badge badge-warning">
-                                            Incident Started
-                                        </span>
-
-                                    {% elif event.event_type == "FAILURE" %}
-                                        <span class="severity-badge badge-error">
-                                            Failure
-                                        </span>
-
-                                    {% elif event.event_type == "RECOVERY" %}
-                                        <span class="severity-badge badge-recovery">
-                                            Recovery
-                                        </span>
-
-                                    {% elif event.severity == "CRITICAL" %}
-                                        <span class="severity-badge badge-critical">
-                                            Critical
-                                        </span>
-
-                                    {% else %}
-                                        <span class="severity-badge badge-warning">
-                                            Warning
-                                        </span>
-                                    {% endif %}
-
-                                    <span class="component ms-2">
-                                        {{ event.component }}
-                                    </span>
-
-                                </div>
-
-                                <time class="muted">
-                                    {{ event.time }}
-                                </time>
-
-                            </div>
-
-                            <p class="event-message">
-                                {{ event.message }}
-                            </p>
-
-                        </article>
-
-                    {% endfor %}
-
-                </div>
-
+            <div class="timeline">
+               {% for event in analysis.incident_story %}
+               <article
+                  class="
+                  timeline-event
+                  {% if event.event_type == 'INCIDENT_START' %}
+                  incident-start
+                  {% elif event.event_type == 'FAILURE' %}
+                  failure
+                  {% elif event.event_type == 'RECOVERY' %}
+                  recovery
+                  {% endif %}
+                  "
+                  >
+                  <div class="event-heading">
+                     <div>
+                        {% if event.event_type == "INCIDENT_START" %}
+                        <span class="severity-badge badge-warning">
+                        Incident Started
+                        </span>
+                        {% elif event.event_type == "FAILURE" %}
+                        <span class="severity-badge badge-error">
+                        Failure
+                        </span>
+                        {% elif event.event_type == "RECOVERY" %}
+                        <span class="severity-badge badge-recovery">
+                        Recovery
+                        </span>
+                        {% elif event.severity == "CRITICAL" %}
+                        <span class="severity-badge badge-critical">
+                        Critical
+                        </span>
+                        {% else %}
+                        <span class="severity-badge badge-warning">
+                        Warning
+                        </span>
+                        {% endif %}
+                        <span class="component ms-2">
+                        {{ event.component }}
+                        </span>
+                     </div>
+                     <time class="muted">
+                     {{ event.time }}
+                     </time>
+                  </div>
+                  <p class="event-message">
+                     {{ event.message }}
+                  </p>
+               </article>
+               {% endfor %}
+            </div>
             {% else %}
-
-                <p class="muted mb-0">
-                    No incident story could be created from this file.
-                </p>
-
+            <p class="muted mb-0">
+               No incident story could be created from this file.
+            </p>
             {% endif %}
-
-        </section>
-
-    </main>
-
-</body>
+         </section>
+      </main>
+   </body>
 </html>

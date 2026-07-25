@@ -37,6 +37,7 @@ def parse_log(file):
             "severity": None,
             "status": "Healthy",
         },
+        "component_summary": {},
     }
 
     incident_started = False
@@ -82,6 +83,12 @@ def parse_log(file):
         if is_abnormal:
 
             event["event_type"] = classify_event(event, incident_started)
+            component = event["component"]
+
+            if component:
+             result["component_summary"][component] = (
+                result["component_summary"].get(component, 0) + 1
+        )
 
             if result["first_abnormal_line"] is None:
                 save_first_abnormal(result, line, event)
@@ -97,6 +104,7 @@ def parse_log(file):
             result["incident_story"].append(recovery_event)
 
             result["incident_summary"]["status"] = "Recovered"
+
 
     return result
 
