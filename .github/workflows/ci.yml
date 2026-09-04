@@ -14,8 +14,12 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build LogSense Docker image
-        run: docker build -t logsense . 
-        
+        run: docker build -t logsense .
+
+      - name: Run automated tests
+        run:  python -m pip install -r backend/requirements.txt
+              python -m pytest
+              
       - name: Start LogSense container
         run: docker run -d --name logsense-ci -p 8000:8000 logsense
 
