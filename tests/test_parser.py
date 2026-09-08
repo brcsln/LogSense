@@ -16,3 +16,18 @@ def test_parser_counts_errors_and_warnings():
     assert result["warnings"] == 1
     assert result["errors"] == 1
     assert result["first_abnormal_severity"] == "WARNING"
+
+
+def test_parser_handles_normal_logs():
+    log_data = (
+        b"2026-07-18 10:00:10 INFO [payment] Request received\n"
+        b"2026-07-18 10:00:11 DEBUG [payment] Processing request\n"
+        b"2026-07-18 10:00:12 INFO [payment] Request completed\n"
+    )
+
+    result = parse_log(BytesIO(log_data))
+
+    assert result["total_lines"] == 3
+    assert result["errors"] == 0
+    assert result["warnings"] == 0
+    assert result["first_abnormal_line"] is None
