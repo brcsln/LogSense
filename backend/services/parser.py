@@ -1,5 +1,5 @@
 import re
-
+from datetime import datetime
 
 LOG_PATTERN = re.compile(
     r"^(?P<time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})"
@@ -105,6 +105,11 @@ def parse_log(file):
 
             result["incident_summary"]["status"] = "Recovered"
 
+    
+    
+    result["correlation_groups"] = correlate_events(
+         result["incident_story"]
+    )
 
     return result
 
@@ -150,5 +155,40 @@ def classify_event(event, incident_started):
         return "FAILURE"
 
     return "WARNING"
+
+
+def correlate_events(incident_story, window_seconds=120):
+    related_groups = []
+    current_group = []
+
+    abnormal_events = [
+        event for event in incident_story
+        if event["severity"] in {"WARNING", "ERROR", "CRITICAL"}
+    ]
+
+    abnormal_events.sort(key=lambda event: event["time"])
+
+    for event in abnormal_events:
+        if not current_group:
+            current_group.append(event)
+            continue
+
+        first_time = datetime.fromisoformat(current_group[0]["time"])
+        event_time = datetime.fromisoformat(event["time"])
+
+        difference = (event_time - first_time).total_seconds()
+
+        if difference <= window_seconds:
+            current_group.append(event)
+        else:
+            if len(current_group) >= 2:
+                related_groups.append(current_group)
+
+            current_group = [event]
+
+    if len(current_group) >= 2:
+        related_groups.append(current_group)
+
+    return related_groups
 
     

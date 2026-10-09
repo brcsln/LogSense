@@ -31,3 +31,18 @@ def test_parser_handles_normal_logs():
     assert result["errors"] == 0
     assert result["warnings"] == 0
     assert result["first_abnormal_line"] is None
+
+
+def test_correlates_nearby_abnormal_events():
+    log_data = (
+        b"2026-07-18 10:14:00 WARNING [payment] Slow response\n"
+        b"2026-07-18 10:15:00 ERROR [database] Connection timeout\n"
+        b"2026-07-18 10:20:00 ERROR [checkout] Payment failed\n"
+    )
+
+    result = parse_log(BytesIO(log_data))
+
+    groups = result["correlation_groups"]
+
+    assert len(groups) == 1
+    assert len(groups[0]) == 2
