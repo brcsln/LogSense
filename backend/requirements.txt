@@ -4,3 +4,4 @@ MarkupSafe==3.0.3
 python-multipart==0.0.32
 uvicorn==0.50.0
 pytest
+httpx

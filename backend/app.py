@@ -1,11 +1,15 @@
+from pathlib import Path
 from fastapi import FastAPI, File, Request, UploadFile
 from fastapi.templating import Jinja2Templates
-from services.parser import parse_log
-
-from services.validator import validate_file
+from .services.parser import parse_log
+from .services.validator import validate_file
 
 app = FastAPI()
-templates = Jinja2Templates(directory="templates")
+BASE_DIR = Path(__file__).resolve().parent
+
+templates = Jinja2Templates(
+    directory=str(BASE_DIR / "templates")
+)
 
 
 @app.get("/")

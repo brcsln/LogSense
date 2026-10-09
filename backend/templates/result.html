@@ -511,6 +511,63 @@
             </p>
             {% endif %}
          </section>
+         
+<section class="panel">
+    <h2 class="section-title">Potentially Related Events</h2>
+
+    <p class="muted">
+        Events occurring within a 2-minute window may be related.
+        This does not confirm a common root cause.
+    </p>
+
+    {% if analysis.correlation_groups %}
+        {% for group in analysis.correlation_groups %}
+
+        <div class="timeline">
+            <h3 class="section-title">
+                Correlation Group {{ loop.index }}
+            </h3>
+
+            {% for event in group %}
+            <article class="timeline-event">
+                <div class="event-heading">
+                    <div>
+                        <span class="severity-badge
+                            {% if event.severity == 'CRITICAL' %}
+                                badge-critical
+                            {% elif event.severity == 'ERROR' %}
+                                badge-error
+                            {% else %}
+                                badge-warning
+                            {% endif %}">
+                            {{ event.severity }}
+                        </span>
+
+                        <span class="component ms-2">
+                            {{ event.component }}
+                        </span>
+                    </div>
+
+                    <time class="muted">
+                        {{ event.time }}
+                    </time>
+                </div>
+
+                <p class="event-message">
+                    {{ event.message }}
+                </p>
+            </article>
+            {% endfor %}
+        </div>
+
+        {% endfor %}
+    {% else %}
+        <p class="muted mb-0">
+            No potentially related abnormal events detected.
+        </p>
+    {% endif %}
+   </section>
+
       </main>
    </body>
 </html>
