@@ -110,15 +110,28 @@ def parse_log(file):
     result["correlation_groups"] = correlate_events(
          result["incident_story"]
     )
+    result["request_groups"] = correlate_by_request_id(
+    result["incident_story"]
+)
 
     return result
 
+REQUEST_ID_PATTERN = re.compile(
+    r"\brequest_id=([A-Za-z0-9_-]+)\b"
+)
 
 def extract_event(line):
     match = LOG_PATTERN.match(line)
+    
 
     if not match:
         return None
+
+    request_match = REQUEST_ID_PATTERN.search(
+    match.group("message")
+)
+
+    request_id = request_match.group(1) if request_match else None
 
     return {
         "time": match.group("time"),
@@ -126,6 +139,7 @@ def extract_event(line):
         "component": match.group("component"),
         "message": match.group("message"),
         "event_type": "LOG_EVENT",
+        "request_id": request_id,
     }
 
 
@@ -160,6 +174,7 @@ def classify_event(event, incident_started):
 def correlate_events(incident_story, window_seconds=120):
     related_groups = []
     current_group = []
+    current_request_ids = set()
 
     abnormal_events = [
         event for event in incident_story
@@ -171,24 +186,49 @@ def correlate_events(incident_story, window_seconds=120):
     for event in abnormal_events:
         if not current_group:
             current_group.append(event)
+
+            if event.get("request_id"):
+                current_request_ids.add(event["request_id"])
+
             continue
 
         first_time = datetime.fromisoformat(current_group[0]["time"])
         event_time = datetime.fromisoformat(event["time"])
 
         difference = (event_time - first_time).total_seconds()
+        same_request = (
+        event.get("request_id") is not None
+        and event["request_id"] in current_request_ids
+    )
 
-        if difference <= window_seconds:
+        if difference <= window_seconds or same_request:
             current_group.append(event)
+            if event.get("request_id"):
+                current_request_ids.add(event["request_id"])
         else:
             if len(current_group) >= 2:
                 related_groups.append(current_group)
 
             current_group = [event]
+            current_request_ids = set()
+
+            if event.get("request_id"):
+             current_request_ids.add(event["request_id"])
+            
+            current_group = [event]
+            current_request_id = event.get("request_id")
 
     if len(current_group) >= 2:
         related_groups.append(current_group)
 
     return related_groups
 
-    
+def correlate_by_request_id(incident_story):
+    request_groups = {}
+    for event in incident_story:
+        request_id = event.get("request_id")
+        if request_id is None:
+            continue
+        request_groups.setdefault(request_id, []).append(event)
+
+    return request_groups

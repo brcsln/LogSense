@@ -1,6 +1,6 @@
 from io import BytesIO
 
-from backend.services.parser import parse_log
+from backend.services.parser import parse_log, correlate_by_request_id
 
 
 def test_parser_counts_errors_and_warnings():
@@ -46,3 +46,47 @@ def test_correlates_nearby_abnormal_events():
 
     assert len(groups) == 1
     assert len(groups[0]) == 2
+
+
+def test_extracts_request_id():
+    from backend.services.parser import extract_event
+
+    line = "2026-07-18 10:14:00 ERROR [payment] Payment failed request_id=456"
+
+    event = extract_event(line)
+
+    assert event["request_id"] == "456"
+
+def test_correlates_matching_request_ids():
+    log_data = (
+        b"2026-07-18 10:00:00 ERROR [payment] Failed request_id=123\n"
+        b"2026-07-18 10:05:00 ERROR [database] Timeout request_id=123\n"
+    )
+
+    result = parse_log(BytesIO(log_data))
+
+    assert len(result["correlation_groups"]) == 1
+    assert len(result["correlation_groups"][0]) == 2
+
+def test_multiple_request_ids_in_group():
+    log_data = (
+        b"2026-07-18 10:00:00 ERROR [payment] Failed request_id=123\n"
+        b"2026-07-18 10:01:00 ERROR [database] Timeout request_id=456\n"
+        b"2026-07-18 10:05:00 ERROR [checkout] Failed request_id=456\n"
+    )
+
+    result = parse_log(BytesIO(log_data))
+
+    assert len(result["correlation_groups"]) == 1
+    assert len(result["correlation_groups"][0]) == 3
+
+
+def test_groups_events_by_request_id():
+    events = [
+        {"request_id": "123", "component": "payment"},
+        {"request_id": "123", "component": "database"},
+    ]
+
+    groups = correlate_by_request_id(events)
+
+    assert len(groups["123"]) == 2
