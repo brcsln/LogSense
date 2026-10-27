@@ -1,0 +1,23 @@
+
+services:
+  logsense:
+    build: .
+    image: logsense:compose
+    container_name: logsense-compose
+    ports:
+      - "8002:8000"
+    volumes:
+      - logsense_data:/app/data
+
+    environment:
+      APP_ENV: development
+      LOG_LEVEL: info
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+volumes:
+    logsense_data:

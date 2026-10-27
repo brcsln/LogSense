@@ -10,6 +10,8 @@ COPY backend/ ./backend/
 
 RUN useradd --create-home --uid 10001 appuser
 
+RUN mkdir -p /app/data && chown -R appuser:appuser /app/data
+
 USER appuser
 
 EXPOSE 8000
